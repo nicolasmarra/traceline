@@ -60,7 +60,7 @@ def geolocaliser(region, nom_fichier):
     longitude = resultats[0]['geometry']['lng']
 
     carte = folium.Map(location=[latitute, longitude], zoom_start=9)
-    folium.Marker([latitute, longitude], popup=region).add_to(map)
+    folium.Marker([latitute, longitude], popup=region).add_to(carte)
     carte.save(nom_fichier+".html")
 
     webbrowser.open(nom_fichier+".html")
