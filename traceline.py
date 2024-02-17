@@ -51,17 +51,35 @@ def afficher_infos(info):
         print("Numéro de téléphone invalide.")
 
 
-def geolocaliser(region, nom_fichier):
+def geolocaliser(info, nom_fichier):
     geocoder = OpenCageGeocode(api_key_folium)
     
-    resultats = geocoder.geocode(str(region))
+    resultats = geocoder.geocode(str(info["region"]))
 
-    latitute = resultats[0]['geometry']['lat']
+    latitude = resultats[0]['geometry']['lat']
     longitude = resultats[0]['geometry']['lng']
 
-    carte = folium.Map(location=[latitute, longitude], zoom_start=9)
-    folium.Marker([latitute, longitude], popup=region).add_to(carte)
+    carte = folium.Map(location=[latitude, longitude], zoom_start=9)
+    
+    popup_contenu = f"Numéro de téléphone : {info['num_tel']}\nOpérateur : {info['operateur']}\nRégion : {info['region']}"
+
+    folium.Marker(
+        location=[latitude, longitude],
+        popup=folium.Popup(popup_contenu, parse_html=True, max_width=300),
+        icon=folium.Icon(color='blue', icon='info-sign')
+    ).add_to(carte)
+
+    legende = '''
+    <div style="position: fixed; bottom: 50px; left: 50px; z-index:9999; font-size:14px; background-color:white; border:2px solid grey; padding: 5px;">
+      <b>Légende</b><br>
+      <span style="color:blue">&#9632;</span> Emplacement du numéro de téléphone
+    </div>
+    '''
+    carte.get_root().html.add_child(folium.Element(legende))
+
     carte.save(nom_fichier+".html")
+
+
 
     webbrowser.open(nom_fichier+".html")
 
@@ -78,7 +96,7 @@ def main():
     
     tel_info = recuperer_infos(tel)
     afficher_infos(tel_info)
-    geolocaliser(tel_info["region"],nom_fichier)
+    geolocaliser(tel_info,nom_fichier)
 
 if __name__ == "__main__":
     main()
