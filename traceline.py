@@ -2,6 +2,10 @@ import phonenumbers
 from phonenumbers import timezone, geocoder, carrier
 import os
 from dotenv import load_dotenv
+from opencage.geocoder import OpenCageGeocode
+import folium
+import webbrowser
+import sys
 
 # Chargement les variables d'environnement
 load_dotenv()
@@ -46,14 +50,35 @@ def afficher_infos(info):
     else:
         print("Numéro de téléphone invalide.")
 
+
+def geolocaliser(region, nom_fichier):
+    geocoder = OpenCageGeocode(api_key_folium)
+    
+    resultats = geocoder.geocode(str(region))
+
+    latitute = resultats[0]['geometry']['lat']
+    longitude = resultats[0]['geometry']['lng']
+
+    carte = folium.Map(location=[latitute, longitude], zoom_start=9)
+    folium.Marker([latitute, longitude], popup=region).add_to(map)
+    carte.save(nom_fichier+".html")
+
+    webbrowser.open(nom_fichier+".html")
+
 def main():
     """
     Fonction principale du programme.
     """
-    #tel = input("Entrez un numéro de téléphone: ")
-    tel = "+33775741552"
+    if len(sys.argv) != 3:
+        print("Usage: python3 traceline.py <numéro de téléphone> <nom du fichier>")
+        sys.exit(1)
+    
+    tel = sys.argv[1]
+    nom_fichier = sys.argv[2]
+    
     tel_info = recuperer_infos(tel)
     afficher_infos(tel_info)
+    geolocaliser(tel_info["region"],nom_fichier)
 
 if __name__ == "__main__":
     main()
